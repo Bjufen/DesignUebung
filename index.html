@@ -4,19 +4,30 @@
     <meta charset="UTF-8">
     <title>D3 Axis Example</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/d3-sankey@0"></script>
     <script src="two.min.js"></script>
     <style>
-        /* Add some basic styling */
         body {
             font-family: Arial, sans-serif;
+            height: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        .svg-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
-<!-- Container for the visualization -->
-<svg id="svg1" width="750" height="500"></svg>
-<svg id="svg2" width="750" height="500"></svg>
-<svg id="svg3" width="750" height="500"></svg>
+<div class="svg-container">
+   <!-- Skizze 4 <svg id="svg1" width="1100" height="1250"></svg>-->
+    <svg id="svg1" width="1100" height="1250"></svg>
+</div>
 <script src="app.js" defer></script>
 </body>
 </html>
