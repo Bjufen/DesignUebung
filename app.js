@@ -1,5 +1,5 @@
 //Skizze 1
-const two1 = new Two({width: 1100, height: 1200}).appendTo(document.getElementById('svg1'));
+/*const two1 = new Two({width: 1100, height: 1200}).appendTo(document.getElementById('svg1'));
 
 
 function loadData(variables) {
@@ -190,10 +190,475 @@ function main() {
             .attr("text-anchor", "middle")
             .text(d => d.value);
     });
+}*/
+
+//Skizze 2
+/*
+
+const two = new Two({width: 1100, height: 1200}).appendTo(document.getElementById('svg1'));
+
+function getScaleX() {
+    // Display space for x-axis
+    return d3.scaleLinear()
+        .domain([0, 90])  // Data space for x-axis
+        .range([100, 1000]);
 }
+
+function getScaleY() {
+    // Display space for y-axis (inverted for y-axis)
+    return d3.scaleLinear()
+        .domain([45, -45])  // Data space for y-axis
+        .range([100, 700]);
+}
+
+function drawLine(svgSelector, x1, y1, x2, y2, strokeColor, strokeWidth) {
+    // Select the SVG container using the selector
+    var svg = d3.select(svgSelector);
+
+    // Append a line to the SVG
+    svg.append("line")
+        .attr("x1", x1)
+        .attr("y1", y1)
+        .attr("x2", x2)
+        .attr("y2", y2)
+        .attr("stroke", strokeColor)
+        .attr("stroke-width", strokeWidth);
+}
+
+
+function drawRectangle(svgSelector, x, y, width, height, color, frequency) {
+    var svg = d3.select(svgSelector);
+
+    svg.append("rect")
+        .attr("x", x)
+        .attr("y", y)
+        .attr("width", width)
+        .attr("height", height)
+        .attr("opacity", 0.9)
+        .attr("fill", color)
+
+    // Calculate the center coordinates of the rectangle
+    const centerX = x + width / 2;
+    const centerY = y + height / 2;
+
+// Add a text element to display in the center of the rectangle
+    svg.append("text")
+        .attr("x", centerX)
+        .attr("y", centerY)
+        .attr("text-anchor", "middle") // Center the text horizontally
+        .attr("dominant-baseline", "middle") // Center the text vertically
+        .attr("fill", "black") // Set the text color
+        .text(frequency);
+}
+
+function drawVerticalLines() {
+    for (let i = 15; i < 90; i += 15) {
+        if (i % 30 === 0) {
+            drawLine('#svg1', getScaleX()(i), getScaleY()(55), getScaleX()(i), getScaleY()(-55), 'black', 1);
+        } else {
+            drawLine('#svg1', getScaleX()(i), getScaleY()(50), getScaleX()(i), getScaleY()(-50), 'black', 1);
+        }
+    }
+}
+
+function drawHorizontalLines() {
+    for (let i = -30; i < 45; i += 15) {
+        if (i === 0) {
+            drawLine('#svg1', getScaleX()(-10), getScaleY()(i), getScaleX()(100), getScaleY()(i), 'black', 1);
+        } else {
+            drawLine('#svg1', getScaleX()(-5), getScaleY()(i), getScaleX()(95), getScaleY()(i), 'black', 1);
+        }
+    }
+}
+
+function loadData(variables) {
+    const csvFilePath = 'DesignuebungGradingData.csv';
+    return d3.csv(csvFilePath, function (d) {
+        let selectedData = {};
+        variables.forEach(varName => {
+            if (d.hasOwnProperty(varName)) {
+                switch (varName) {
+                    case 'Year':
+                    case 'Attemptnumber':
+                        selectedData[varName] = +d[varName];
+                        break;
+
+                    case 'Grade':
+                        selectedData['Status'] = d[varName] === '5' ? 'Fail' : 'Pass';
+                        break;
+
+                    case 'Time to complete exam':
+                        selectedData['min2com'] = +d[varName];
+                        break;
+
+                    case 'Nachklausur':
+                        selectedData[varName] = d[varName] === 'yes';
+                        break;
+
+                    case 'Course':
+                        selectedData['isVis'] = d[varName] === 'Vis';
+                        break;
+
+                    case 'Study':
+                        selectedData['isInformatiker'] = d[varName] === 'WirtschaftsInformatik';
+                        break;
+
+                    default:
+                        selectedData['isBachelor'] = d[varName] === 'Bachelor';
+                        break;
+                }
+            }
+        });
+
+        return selectedData;
+    });
+}
+
+function getFilteredData() {
+    const variables = ['Time to complete exam', 'Year', 'Grade', 'Attemptnumber', 'Bachelor/Master'];
+    return loadData(variables);
+}
+
+function assignData() {
+    let dataArray = new Array(36);
+    for (let i = 0; i < dataArray.length; i++) {
+        dataArray[i] = {
+            frequency: 0,
+            sumTime: 0,
+            avgTime: 0
+        }
+    }
+    return getFilteredData().then(data => {
+        data.forEach(d => {
+            if (d.Year === 2021) {
+                if (d.Attemptnumber === 1) {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[0].frequency++;
+                            dataArray[0].sumTime += d.min2com;
+                        } else {
+                            dataArray[1].frequency++;
+                            dataArray[1].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[18].frequency++;
+                            dataArray[18].sumTime += d.min2com;
+                        } else {
+                            dataArray[19].frequency++;
+                            dataArray[19].sumTime += d.min2com;
+                        }
+                    }
+                } else if (d.Attemptnumber === 2) {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[2].frequency++;
+                            dataArray[2].sumTime += d.min2com;
+                        } else {
+                            dataArray[3].frequency++;
+                            dataArray[3].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[20].frequency++;
+                            dataArray[20].sumTime += d.min2com;
+                        } else {
+                            dataArray[21].frequency++;
+                            dataArray[21].sumTime += d.min2com;
+                        }
+                    }
+                } else {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[4].frequency++;
+                            dataArray[4].sumTime += d.min2com;
+                        } else {
+                            dataArray[5].frequency++;
+                            dataArray[5].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[22].frequency++;
+                            dataArray[22].sumTime += d.min2com;
+                        } else {
+                            dataArray[23].frequency++;
+                            dataArray[23].sumTime += d.min2com;
+                        }
+                    }
+                }
+            } else if (d.Year === 2022) {
+                if (d.Attemptnumber === 1) {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[6].frequency++;
+                            dataArray[6].sumTime += d.min2com;
+                        } else {
+                            dataArray[7].frequency++;
+                            dataArray[7].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[24].frequency++;
+                            dataArray[24].sumTime += d.min2com;
+                        } else {
+                            dataArray[25].frequency++;
+                            dataArray[25].sumTime += d.min2com;
+                        }
+                    }
+                } else if (d.Attemptnumber === 2) {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[8].frequency++;
+                            dataArray[8].sumTime += d.min2com;
+                        } else {
+                            dataArray[9].frequency++;
+                            dataArray[9].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[26].frequency++;
+                            dataArray[26].sumTime += d.min2com;
+                        } else {
+                            dataArray[27].frequency++;
+                            dataArray[27].sumTime += d.min2com;
+                        }
+                    }
+                } else {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[10].frequency++;
+                            dataArray[10].sumTime += d.min2com;
+                        } else {
+                            dataArray[11].frequency++;
+                            dataArray[11].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[28].frequency++;
+                            dataArray[28].sumTime += d.min2com;
+                        } else {
+                            dataArray[29].frequency++;
+                            dataArray[29].sumTime += d.min2com;
+                        }
+                    }
+                }
+            } else {
+                if (d.Attemptnumber === 1) {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[12].frequency++;
+                            dataArray[12].sumTime += d.min2com;
+                        } else {
+                            dataArray[13].frequency++;
+                            dataArray[13].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[30].frequency++;
+                            dataArray[30].sumTime += d.min2com;
+                        } else {
+                            dataArray[31].frequency++;
+                            dataArray[31].sumTime += d.min2com;
+                        }
+                    }
+                } else if (d.Attemptnumber === 2) {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[14].frequency++;
+                            dataArray[14].sumTime += d.min2com;
+                        } else {
+                            dataArray[15].frequency++;
+                            dataArray[15].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[32].frequency++;
+                            dataArray[32].sumTime += d.min2com;
+                        } else {
+                            dataArray[33].frequency++;
+                            dataArray[33].sumTime += d.min2com;
+                        }
+                    }
+                } else {
+                    if (d.isBachelor) {
+                        if (d.Status === "Pass") {
+                            dataArray[16].frequency++;
+                            dataArray[16].sumTime += d.min2com;
+                        } else {
+                            dataArray[17].frequency++;
+                            dataArray[17].sumTime += d.min2com;
+                        }
+                    } else {
+                        if (d.Status === "Pass") {
+                            dataArray[34].frequency++;
+                            dataArray[34].sumTime += d.min2com;
+                        } else {
+                            dataArray[35].frequency++;
+                            dataArray[35].sumTime += d.min2com;
+                        }
+                    }
+                }
+            }
+        });
+        return getAvgTime(dataArray);
+    });
+}
+
+function getAvgTime(data) {
+    data.forEach(d => {
+        if (d.frequency !== 0) {
+            d.avgTime = d.sumTime / d.frequency;
+        }
+    });
+    return data;
+}
+
+function getColor(time) {
+    // Define the color scale for the heatmap (you can customize the color scheme)
+    const colorScale = d3.scaleSequential(d3.interpolatePlasma).domain([0, 90]);
+    // Map the time value to the color scale
+    return colorScale(time);
+}
+
+function drawRectangles(data) {
+    let yIndex = new Array(36);
+    let xIndex = new Array(36);
+    for (let i = 0; i < yIndex.length; i++) {
+        if(i < 6) {
+            yIndex[i] = 45;
+        }
+        else if(i < 12) {
+            yIndex[i] = 30;
+        }
+        else if(i < 18) {
+            yIndex[i] = 15;
+        }
+        else if(i < 24) {
+            yIndex[i] = 0;
+        }
+        else if(i < 30) {
+            yIndex[i] = -15;
+        }
+        else {
+            yIndex[i] = -30;
+        }
+    }
+    for (let i = 0; i < xIndex.length; i++) {
+        if(i % 6 === 0) {
+            xIndex[i] = 0;
+        }
+        else if(i % 6 === 1) {
+            xIndex[i] = 15;
+        }
+        else if(i % 6 === 2) {
+            xIndex[i] = 30;
+        }
+        else if(i % 6 === 3) {
+            xIndex[i] = 45;
+        }
+        else if(i % 6 === 4) {
+            xIndex[i] = 60;
+        }
+        else {
+            xIndex[i] = 75;
+        }
+    }
+
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].frequency !== 0) {
+            drawRectangle('#svg1', getScaleX()(xIndex[i]), getScaleY()(yIndex[i]),getScaleX()(15) - getScaleX()(0), getScaleY()(15) - getScaleY()(30), getColor(data[i].avgTime), data[i].frequency);
+        }
+    }
+}
+
+function drawLines() {
+    drawVerticalLines();
+    drawHorizontalLines();
+}
+
+function drawLegend() {
+    const legendWidth = 600;
+    const legendHeight = 50;
+
+    const colorScale = d3.scaleSequential(d3.interpolatePlasma).domain([0, 90]);
+
+    const legend = d3.select('#svg1')  // Append to the #svg1 element
+        .append('g')                    // Create a group for the legend
+        .attr('id', 'legend')           // Assign an ID to the group for positioning
+        .attr('transform', 'translate(250, 850)');  // Set the coordinates of the legend
+
+    const legendScale = d3.scaleLinear()
+        .domain([0, 90])
+        .range([0, legendWidth]);
+
+    const legendAxis = d3.axisBottom(legendScale)
+        .ticks(5)
+        .tickFormat(d => `${d}m`);
+
+    legend.append('g')
+        .attr('transform', `translate(0, 50)`)
+        .call(legendAxis);
+
+    // Add gradient color to the legend
+    legend.append('defs')
+        .append('linearGradient')
+        .attr('id', 'legendGradient')
+        .selectAll('stop')
+        .data(d3.ticks(0, 90, 10))
+        .enter()
+        .append('stop')
+        .attr('offset', d => `${(d / 90) * 100}%`)
+        .attr('stop-color', d => colorScale(d));
+
+    legend.append('rect')
+        .attr('width', legendWidth)
+        .attr('height', legendHeight)
+        .style('fill', 'url(#legendGradient)');
+}
+
+function addLabels() {
+    // Add labels for vertical lines
+    for (let i = 15; i < 90; i += 15) {
+        if (i % 30 === 0) {
+            addLabel('#svg1', getScaleX()(i), getScaleY()(-60), i.toString(), 'middle', 'middle', 'black', '12px');
+        }
+    }
+
+    // Add labels for horizontal lines
+    for (let i = -30; i < 45; i += 15) {
+        addLabel('#svg1', getScaleX()(-8), getScaleY()(i), i.toString(), 'end', 'middle', 'black', '12px');
+    }
+}
+
+function addLabel(svgSelector, x, y, text, anchor, baseline, color, fontSize) {
+    d3.select(svgSelector)
+        .append('text')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('text-anchor', anchor)
+        .attr('dominant-baseline', baseline)
+        .attr('fill', color)
+        .style('font-size', fontSize)
+        .text(text);
+}
+
+function main() {
+    const scaleX = getScaleX();
+    const scaleY = getScaleY();
+    drawLines();
+    assignData().then(data => {
+        console.log(data);
+        drawRectangles(data);
+    });
+    drawLegend();
+}
+
+*/
 
 // Skizze 4
 /*
+
+
 const two1 = new Two({width: 1100, height: 1250}).appendTo(document.getElementById('svg1'));
 // Method to get the x-scale
 function getScaleX() {
@@ -452,7 +917,7 @@ function sketch1(svgSelector) {
             return { y: index, x: value };
         });
         let failedDataArray = failedDataResult.map((value, index) => {
-            return { y: index, x: (- value) };
+            return { y: index, x:  -value };
         });
 
 
@@ -507,10 +972,13 @@ function main() {
     axesWithD3('#svg1', 'Template 1', 'Relative Häufigkeit', 'Kategorie');
     sketch1('#svg1');
 }
+
 */
+
 
 // Skizze 6
 /*
+
 const two1 = new Two({width: 1100, height: 1200}).appendTo(document.getElementById('svg1'));
 
 function getScaleX() {
@@ -769,8 +1237,207 @@ function main() {
     });
 
 }
-
 */
+
+// Skizze 7
+
+
+//create a circle using d3
+function drawCircle(svgSelector, x, y, radius, color, text) {
+    // Select the SVG container using the selector
+    var svg = d3.select(svgSelector);
+
+    // Append a circle to the SVG
+    svg.append("circle")
+        .attr("cx", x)
+        .attr("cy", y)
+        .attr("r", radius)
+        .attr("fill", color);
+    svg.append("text")
+        .attr("x", x)
+        .attr("y", y)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "black")
+        .style("font-size", "12px")
+        .text(text);
+}
+
+drawCircle('#svg1', getScaleX()(0), getScaleY()(0), 5, 'red', '');
+drawCircle('#svg1', getScaleX()(0), getScaleY()(100), 5, 'red', '');
+drawCircle('#svg1', getScaleX()(100), getScaleY()(0), 5, 'red', '');
+drawCircle('#svg1', getScaleX()(100), getScaleY()(100), 5, 'red', '');
+addTitle('#svg1', 'Visualisierungslösung');
+function getScaleX() {
+    // Display space for x-axis
+    return d3.scaleLinear()
+        .domain([0, 100])  // Data space for x-axis
+        .range([0, 1250]);
+}
+
+function getScaleY() {
+    // Display space for x-axis
+    return d3.scaleLinear()
+        .domain([0, 100])  // Data space for y-axis
+        .range([0, 1250]);
+}
+
+function loadData(variables) {
+    const csvFilePath = 'DesignuebungGradingData.csv';
+    return d3.csv(csvFilePath, function (d) {
+        let selectedData = {};
+        variables.forEach(varName => {
+            if (d.hasOwnProperty(varName)) {
+                switch (varName) {
+
+                    case 'Grade':
+                        selectedData['Status'] = d[varName] === '5' ? 'Fail' : 'Pass';
+                        break;
+                    case 'Year':
+                    case 'Attemptnumber':
+                        selectedData[varName] = +d[varName];
+                        break;
+
+                    case 'Time to complete exam':
+                        selectedData['min2com'] = +d[varName];
+                        break;
+
+                    case 'Nachklausur':
+                        selectedData[varName] = d[varName] === 'yes';
+                        break;
+
+                    case 'Course':
+                        selectedData['isVis'] = d[varName] === 'Vis';
+                        break;
+
+                    case 'Study':
+                        selectedData['isInformatiker'] = d[varName] === 'WirtschaftsInformatik';
+                        break;
+
+                    default:
+                        selectedData['Bachelor student'] = d[varName] === 'Bachelor';
+                        break;
+                }
+            }
+        });
+
+        return selectedData;
+    });
+}
+
+function mapMin2Com(data) {
+    data.forEach(d => {
+        if (d.min2com >= 0 && d.min2com <= 30) {
+            d.min2com = "0 - 30";
+        } else if (d.min2com >= 31 && d.min2com <= 60) {
+            d.min2com = "31 - 60";
+        } else if (d.min2com >= 61 && d.min2com <= 90) {
+            d.min2com = "61 - 90";
+        }
+    });
+}
+
+function getFilteredData() {
+    const variables = ['Time to complete exam', 'Year', 'Grade', 'Attemptnumber', 'Nachklausur', 'Bachelor/Master'];
+    return loadData(variables).then(data => {
+        mapMin2Com(data);
+        return data;
+    });
+}
+
+function calculatePassFailRatio(data, attributeName) {
+    const passFailCounts = {};
+
+    data.forEach(d => {
+        const attributeValue = d[attributeName];
+        if (!passFailCounts[attributeValue]) {
+            passFailCounts[attributeValue] = { pass: 0, fail: 0 };
+        }
+
+        if (d.Status === 'Pass') {
+            passFailCounts[attributeValue].pass++;
+        } else {
+            passFailCounts[attributeValue].fail++;
+        }
+    });
+    const ratioData = {};
+    for (const attributeValue in passFailCounts) {
+        const passCount = passFailCounts[attributeValue].pass || 0;
+        const failCount = passFailCounts[attributeValue].fail || 0;
+        const total = passCount + failCount;
+
+        ratioData[attributeValue] = {
+            pass: passCount,
+            fail: failCount,
+            ratio: total > 0 ? passCount / total : 0,
+        };
+    }
+
+    return ratioData;
+}
+
+
+//Create Site Title
+function addTitle(svgSelector, titleText) {
+    // Select the SVG container using the selector
+    var svg = d3.select(svgSelector);
+
+    // Append a text to the SVG
+    svg.append("text")
+        .attr("x", getScaleX()(50))
+        .attr("y", getScaleY()(5))
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "black")
+        .style("font-family", "Times New Roman")
+        .style("font-size", "48px")
+        .text(titleText);
+}
+
+function getPassFailRatio(data){
+    let passCount = 0;
+    data.forEach(d => {
+        if(d.Status === 'Pass'){
+            passCount++;
+        }
+    });
+    return {
+        pass: passCount,
+        fail: data.length - passCount,
+        ratio: passCount / data.length
+    };
+}
+
+function createAxis
+
+function main(){
+    getFilteredData().then(data => {
+        const attributes = ['min2com', 'Year', 'Nachklausur', 'Attemptnumber', 'Bachelor student'];
+        let ratioData = {};
+            attributes.forEach(attribute => {
+            ratioData[attribute] = calculatePassFailRatio(data, attribute);
+        });
+        ratioData['Status'] = getPassFailRatio(data);
+        console.log(ratioData);
+        console.log(ratioData['Attemptnumber']);
+        console.log(Object.keys(ratioData['Attemptnumber']['1']));
+        console.log(Object.values(ratioData['Attemptnumber']['1']));
+        for (const attribute in ratioData) {
+            if (ratioData.hasOwnProperty(attribute)) {
+            }
+        }
+    });
+    const chartData = [
+        { name: "Attempt 1", values: [0.8419117647058824, 1 - 0.8419117647058824] },
+        { name: "Attempt 2", values: [0.84375, 1 - 0.84375] },
+        { name: "Attempt 3", values: [0.65, 1 - 0.65] }
+    ];
+
+    createHorizontalStackedBarChart(chartData, '#svg1', 1000, 1000, 100, 10);
+}
+
+
+
 
 main();
 
