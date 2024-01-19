@@ -514,7 +514,7 @@ function getAvgTime(data) {
 }
 
 function getColor(time) {
-    // Define the color scale for the heatmap (you can customize the color scheme)
+    // Define the color scale for the heatmap
     const colorScale = d3.scaleSequential(d3.interpolatePlasma).domain([0, 90]);
     // Map the time value to the color scale
     return colorScale(time);
@@ -743,11 +743,11 @@ function axesWithD3(svgSelector, titleText, xAxisName, yAxisName) {
     // Append a title at the top of each SVG
     svg.append("text")
         .attr("class", "chart-title")
-        .attr("x", 1000) // Centered in the middle of the SVG (adjust as needed)
-        .attr("y", 30)  // Positioned at the top of the SVG (adjust as needed)
+        .attr("x", 1000) // Centered in the middle of the SVG
+        .attr("y", 30)  // Positioned at the top of the SVG
         .attr("text-anchor", "middle")
         .style("font-family", "Times New Roman")  // Set the font to Times New Roman
-        .style("font-size", "20px")  // Optional: Adjust the font size as needed
+        .style("font-size", "20px")
         .text(titleText);  // Use the titleText parameter for the title
 
     gY.selectAll(".tick line").attr("stroke-width", 0);
@@ -926,7 +926,7 @@ function sketch1(svgSelector) {
             .y(d => scaleY(d.y))  // y value is the index
             .curve(d3.curveMonotoneX);
 
-        let areaGenerator = d3.area() // This should be the start of your y range, ensuring the bottom of the area
+        let areaGenerator = d3.area()
             .x0(scaleX(0)) // This should correspond to the y-axis position
             .x1(d => scaleX(d.x)) // x value is now directly from the data
             .y(d => scaleY(d.y))
@@ -1238,206 +1238,6 @@ function main() {
 
 }
 */
-
-// Skizze 7
-
-
-//create a circle using d3
-function drawCircle(svgSelector, x, y, radius, color, text) {
-    // Select the SVG container using the selector
-    var svg = d3.select(svgSelector);
-
-    // Append a circle to the SVG
-    svg.append("circle")
-        .attr("cx", x)
-        .attr("cy", y)
-        .attr("r", radius)
-        .attr("fill", color);
-    svg.append("text")
-        .attr("x", x)
-        .attr("y", y)
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .attr("fill", "black")
-        .style("font-size", "12px")
-        .text(text);
-}
-
-drawCircle('#svg1', getScaleX()(0), getScaleY()(0), 5, 'red', '');
-drawCircle('#svg1', getScaleX()(0), getScaleY()(100), 5, 'red', '');
-drawCircle('#svg1', getScaleX()(100), getScaleY()(0), 5, 'red', '');
-drawCircle('#svg1', getScaleX()(100), getScaleY()(100), 5, 'red', '');
-addTitle('#svg1', 'Visualisierungslösung');
-function getScaleX() {
-    // Display space for x-axis
-    return d3.scaleLinear()
-        .domain([0, 100])  // Data space for x-axis
-        .range([0, 1250]);
-}
-
-function getScaleY() {
-    // Display space for x-axis
-    return d3.scaleLinear()
-        .domain([0, 100])  // Data space for y-axis
-        .range([0, 1250]);
-}
-
-function loadData(variables) {
-    const csvFilePath = 'DesignuebungGradingData.csv';
-    return d3.csv(csvFilePath, function (d) {
-        let selectedData = {};
-        variables.forEach(varName => {
-            if (d.hasOwnProperty(varName)) {
-                switch (varName) {
-
-                    case 'Grade':
-                        selectedData['Status'] = d[varName] === '5' ? 'Fail' : 'Pass';
-                        break;
-                    case 'Year':
-                    case 'Attemptnumber':
-                        selectedData[varName] = +d[varName];
-                        break;
-
-                    case 'Time to complete exam':
-                        selectedData['min2com'] = +d[varName];
-                        break;
-
-                    case 'Nachklausur':
-                        selectedData[varName] = d[varName] === 'yes';
-                        break;
-
-                    case 'Course':
-                        selectedData['isVis'] = d[varName] === 'Vis';
-                        break;
-
-                    case 'Study':
-                        selectedData['isInformatiker'] = d[varName] === 'WirtschaftsInformatik';
-                        break;
-
-                    default:
-                        selectedData['Bachelor student'] = d[varName] === 'Bachelor';
-                        break;
-                }
-            }
-        });
-
-        return selectedData;
-    });
-}
-
-function mapMin2Com(data) {
-    data.forEach(d => {
-        if (d.min2com >= 0 && d.min2com <= 30) {
-            d.min2com = "0 - 30";
-        } else if (d.min2com >= 31 && d.min2com <= 60) {
-            d.min2com = "31 - 60";
-        } else if (d.min2com >= 61 && d.min2com <= 90) {
-            d.min2com = "61 - 90";
-        }
-    });
-}
-
-function getFilteredData() {
-    const variables = ['Time to complete exam', 'Year', 'Grade', 'Attemptnumber', 'Nachklausur', 'Bachelor/Master'];
-    return loadData(variables).then(data => {
-        mapMin2Com(data);
-        return data;
-    });
-}
-
-function calculatePassFailRatio(data, attributeName) {
-    const passFailCounts = {};
-
-    data.forEach(d => {
-        const attributeValue = d[attributeName];
-        if (!passFailCounts[attributeValue]) {
-            passFailCounts[attributeValue] = { pass: 0, fail: 0 };
-        }
-
-        if (d.Status === 'Pass') {
-            passFailCounts[attributeValue].pass++;
-        } else {
-            passFailCounts[attributeValue].fail++;
-        }
-    });
-    const ratioData = {};
-    for (const attributeValue in passFailCounts) {
-        const passCount = passFailCounts[attributeValue].pass || 0;
-        const failCount = passFailCounts[attributeValue].fail || 0;
-        const total = passCount + failCount;
-
-        ratioData[attributeValue] = {
-            pass: passCount,
-            fail: failCount,
-            ratio: total > 0 ? passCount / total : 0,
-        };
-    }
-
-    return ratioData;
-}
-
-
-//Create Site Title
-function addTitle(svgSelector, titleText) {
-    // Select the SVG container using the selector
-    var svg = d3.select(svgSelector);
-
-    // Append a text to the SVG
-    svg.append("text")
-        .attr("x", getScaleX()(50))
-        .attr("y", getScaleY()(5))
-        .attr("text-anchor", "middle")
-        .attr("dominant-baseline", "middle")
-        .attr("fill", "black")
-        .style("font-family", "Times New Roman")
-        .style("font-size", "48px")
-        .text(titleText);
-}
-
-function getPassFailRatio(data){
-    let passCount = 0;
-    data.forEach(d => {
-        if(d.Status === 'Pass'){
-            passCount++;
-        }
-    });
-    return {
-        pass: passCount,
-        fail: data.length - passCount,
-        ratio: passCount / data.length
-    };
-}
-
-function createAxis
-
-function main(){
-    getFilteredData().then(data => {
-        const attributes = ['min2com', 'Year', 'Nachklausur', 'Attemptnumber', 'Bachelor student'];
-        let ratioData = {};
-            attributes.forEach(attribute => {
-            ratioData[attribute] = calculatePassFailRatio(data, attribute);
-        });
-        ratioData['Status'] = getPassFailRatio(data);
-        console.log(ratioData);
-        console.log(ratioData['Attemptnumber']);
-        console.log(Object.keys(ratioData['Attemptnumber']['1']));
-        console.log(Object.values(ratioData['Attemptnumber']['1']));
-        for (const attribute in ratioData) {
-            if (ratioData.hasOwnProperty(attribute)) {
-            }
-        }
-    });
-    const chartData = [
-        { name: "Attempt 1", values: [0.8419117647058824, 1 - 0.8419117647058824] },
-        { name: "Attempt 2", values: [0.84375, 1 - 0.84375] },
-        { name: "Attempt 3", values: [0.65, 1 - 0.65] }
-    ];
-
-    createHorizontalStackedBarChart(chartData, '#svg1', 1000, 1000, 100, 10);
-}
-
-
-
 
 main();
 
