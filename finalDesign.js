@@ -52,7 +52,7 @@ function loadData(variables) {
                         break;
 
                     case 'Nachklausur':
-                        selectedData[varName] = d[varName] === 'yes';
+                        selectedData[varName] = d[varName] !== 'No';
                         break;
 
                     case 'Course':
