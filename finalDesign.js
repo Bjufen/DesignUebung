@@ -15,6 +15,22 @@ function getScaleY() {
         .range([0, 1250]);
 }
 
+function addSource(svgSelector, sourceText) {
+    // Select the SVG container using the selector
+    const svg = d3.select(svgSelector);
+
+    // Append a text to the SVG
+    svg.append("text")
+        .attr("x", getScaleX()(85))
+        .attr("y", getScaleY()(99))
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "black")
+        .style("font-family", "Times New Roman")
+        .style("font-size", "18px")
+        .text(sourceText);
+}
+
 function addTitle(svgSelector, titleText) {
     // Select the SVG container using the selector
     const svg = d3.select(svgSelector);
@@ -29,6 +45,32 @@ function addTitle(svgSelector, titleText) {
         .style("font-family", "Times New Roman")
         .style("font-size", "48px")
         .text(titleText);
+}
+
+function addLegend(){
+    const svg = d3.select('#svg1');
+
+    drawRectangle(svg, getScaleX()(96), getScaleY()(3.2), getScaleX()(3), getScaleY()(1.5), 'green', null);
+    drawRectangle(svg, getScaleX()(96), getScaleY()(5.2), getScaleX()(3), getScaleY()(1.5), 'red', null);
+    svg.append("text")
+        .attr("x", getScaleX()(94))
+        .attr("y", getScaleY()(4))
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "black")
+        .style("font-family", "Times New Roman")
+        .style("font-size", "16x")
+        .text('Passed');
+
+    svg.append("text")
+        .attr("x", getScaleX()(94))
+        .attr("y", getScaleY()(6))
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("fill", "black")
+        .style("font-family", "Times New Roman")
+        .style("font-size", "16x")
+        .text('Failed');
 }
 
 function loadData(variables) {
@@ -339,7 +381,9 @@ function drawRectangle(svgSelector, x, y, width, height, color, data) {
 }
 
 function main() {
-    addTitle('#svg1', 'Ratio of passed & failed students for the categories');
+    addTitle('#svg1', 'Ratio of Passed & Failed Students for the Categories');
+    addSource('#svg1', 'Source: DesignuebungGradingData.csv');
+    addLegend();
     getFilteredData().then(data => {
         const attributes = ['min2com', 'Year', 'Nachklausur', 'Attemptnumber', 'Bachelor student'];
         let ratioData = {};
